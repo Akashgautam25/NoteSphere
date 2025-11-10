@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Mail, Lock, Eye, EyeOff } from 'lucide-react';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { getApiUrl } from '../utils/api';
+import { getApiUrl, apiCall } from '../utils/api';
 
 const Login = () => {
   const [email, setEmail] = useState('');
@@ -24,20 +24,20 @@ const Login = () => {
     }
     
     try {
-      const baseURL = getApiUrl();
-      
-      const response = await axios.post(`${baseURL}/api/auth/login`, {
-        email: email.trim().toLowerCase(),
-        password
-      }, {
-        timeout: 10000,
-        headers: {
-          'Content-Type': 'application/json'
-        }
+      const response = await apiCall('/api/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: email.trim().toLowerCase(),
+          password
+        })
       });
       
-      login(response.data.token, response.data.user);
-      navigate('/dashboard');
+      if (response.ok && response.data.token) {
+        login(response.data.token, response.data.user);
+        navigate('/dashboard');
+      } else {
+        throw new Error(response.data.message || 'Login failed');
+      }
     } catch (error) {
       console.error('Login error:', error);
       
