@@ -586,13 +586,13 @@ const Dashboard = () => {
                 </button>
               </div>
               
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
-                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
-                  <div className="flex items-center space-x-3">
-                    <div className="text-2xl">📝</div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
+                <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-3 sm:p-4 border border-blue-200">
+                  <div className="flex items-center space-x-2 sm:space-x-3">
+                    <div className="text-xl sm:text-2xl">📝</div>
                     <div>
-                      <p className="text-sm font-medium text-blue-800">Total Pages</p>
-                      <p className="text-xl font-bold text-blue-900">{notes.length}</p>
+                      <p className="text-xs sm:text-sm font-medium text-blue-800">Total Pages</p>
+                      <p className="text-lg sm:text-xl font-bold text-blue-900">{notes.length}</p>
                     </div>
                   </div>
                 </div>
@@ -691,7 +691,7 @@ const Dashboard = () => {
                 </table>
               </div>
             </div>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
               <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                 <div className="flex items-center justify-between mb-6">
                   <h3 className="text-lg font-semibold text-gray-900">Notes Created Over Time</h3>
@@ -1593,18 +1593,18 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 lg:gap-6">
                 {templates.map((template) => (
                   <div 
                     key={template.id} 
                     onClick={() => createFromTemplate(template)}
-                    className="group border-0 rounded-xl p-5 hover:shadow-xl transition-all cursor-pointer bg-white hover:scale-105 duration-300 shadow-md"
+                    className="group border-0 rounded-xl p-3 sm:p-5 hover:shadow-xl transition-all cursor-pointer bg-white hover:scale-105 duration-300 shadow-md"
                   >
-                    <div className={`w-12 h-12 bg-gradient-to-br ${template.color} rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform shadow-sm`}>
-                      <template.icon className="w-6 h-6 text-white" />
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br ${template.color} rounded-xl flex items-center justify-center mb-3 sm:mb-4 group-hover:scale-110 transition-transform shadow-sm`}>
+                      <template.icon className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
                     </div>
-                    <h3 className="font-bold text-gray-900 mb-2 text-sm">{template.name}</h3>
-                    <p className="text-xs text-gray-600 leading-relaxed mb-3">{template.description}</p>
+                    <h3 className="font-bold text-gray-900 mb-1 sm:mb-2 text-xs sm:text-sm">{template.name}</h3>
+                    <p className="text-xs text-gray-600 leading-relaxed mb-2 sm:mb-3 line-clamp-2">{template.description}</p>
                     <div className="flex items-center text-gray-500 text-xs opacity-0 group-hover:opacity-100 transition-opacity">
                       <Plus className="w-3 h-3 mr-1" />
                       <span>Create from template</span>
@@ -1837,7 +1837,7 @@ const Dashboard = () => {
       )}
       
       {/* Left Sidebar */}
-      <div className={`w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm transition-transform duration-300 ${
+      <div className={`w-64 sm:w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm transition-transform duration-300 ${
         showMobileMenu ? 'translate-x-0' : '-translate-x-full'
       } lg:translate-x-0 fixed lg:relative z-40 h-full lg:h-auto`}>
         {/* Logo */}
@@ -1926,15 +1926,15 @@ const Dashboard = () => {
       {/* Main Content */}
       <div className="flex-1 flex flex-col lg:ml-0">
         {/* Top Navbar */}
-        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3">
+        <header className="bg-white border-b border-gray-200 px-2 sm:px-4 lg:px-6 py-3">
           <div className="flex items-center justify-between">
             {/* Search Bar */}
-            <div className="flex-1 max-w-lg ml-12 lg:ml-0">
+            <div className="flex-1 max-w-xs sm:max-w-lg ml-10 sm:ml-12 lg:ml-0">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-2 sm:left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
                   type="text"
-                  placeholder="Search pages..."
+                  placeholder="Search..."
                   value={searchTerm}
                   onChange={(e) => {
                     setSearchTerm(e.target.value);
@@ -1942,36 +1942,36 @@ const Dashboard = () => {
                       setActiveTab('notes');
                     }
                   }}
-                  className="w-full pl-10 pr-4 py-2 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm"
+                  className="w-full pl-8 sm:pl-10 pr-2 sm:pr-4 py-2 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-xs sm:text-sm"
                 />
               </div>
             </div>
 
             {/* Actions & Profile */}
-            <div className="flex items-center space-x-2 lg:space-x-3">
+            <div className="flex items-center space-x-1 sm:space-x-2 lg:space-x-3">
               <button 
                 onClick={openCreateModal}
-                className="flex items-center space-x-2 px-2 lg:px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                className="flex items-center space-x-1 sm:space-x-2 px-2 sm:px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-xs sm:text-sm"
               >
-                <Plus className="w-4 h-4" />
+                <Plus className="w-3 h-3 sm:w-4 sm:h-4" />
                 <span className="hidden sm:inline">New</span>
               </button>
               
-              <div className="flex items-center space-x-2">
-                <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-white" />
+              <div className="flex items-center space-x-1 sm:space-x-2">
+                <div className="w-6 h-6 sm:w-7 sm:h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
+                  <User className="w-3 h-3 sm:w-4 sm:h-4 text-white" />
                 </div>
-                <div className="hidden md:block">
+                <div className="hidden lg:block">
                   <p className="text-sm font-medium text-gray-900">
                     {(user?.fullName || user?.name || 'Student').split(' ')[0]}
                   </p>
                 </div>
                 <button
                   onClick={handleLogout}
-                  className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+                  className="p-1 sm:p-2 text-gray-400 hover:text-gray-600 transition-colors"
                   title="Logout"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3 h-3 sm:w-4 sm:h-4" />
                 </button>
               </div>
             </div>
@@ -1981,12 +1981,12 @@ const Dashboard = () => {
         {/* Dashboard Content */}
         <div className="flex-1 flex flex-col xl:flex-row">
           {/* Main Dashboard */}
-          <main className="flex-1 p-4 lg:p-6">
+          <main className="flex-1 p-2 sm:p-4 lg:p-6">
             {renderContent()}
           </main>
 
           {/* Right Sidebar - Notion Style */}
-          <aside className="w-full xl:w-72 bg-gray-50 border-t xl:border-t-0 xl:border-l border-gray-200 p-4">
+          <aside className="w-full xl:w-72 bg-gray-50 border-t xl:border-t-0 xl:border-l border-gray-200 p-2 sm:p-4">
             <div className="space-y-6">
               {/* Quick Templates */}
               <div>
@@ -2073,14 +2073,14 @@ const Dashboard = () => {
         </div>
 
         {/* Footer */}
-        <footer className="bg-gray-50 border-t border-gray-200 px-6 py-2">
-          <div className="flex items-center justify-between text-xs text-gray-500">
-            <div className="flex items-center space-x-4">
-              <span>💾 Auto-saved locally</span>
-              <span>•</span>
+        <footer className="bg-gray-50 border-t border-gray-200 px-2 sm:px-6 py-2">
+          <div className="flex flex-col sm:flex-row items-center justify-between text-xs text-gray-500 space-y-1 sm:space-y-0">
+            <div className="flex items-center space-x-2 sm:space-x-4">
+              <span>💾 Auto-saved</span>
+              <span className="hidden sm:inline">•</span>
               <span>{notes.length} pages</span>
             </div>
-            <span>© 2025 NoteSphere - Your Digital Workspace</span>
+            <span className="text-center">© 2025 NoteSphere</span>
           </div>
         </footer>
       </div>
