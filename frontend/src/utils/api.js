@@ -53,14 +53,15 @@ export const mockApiCall = (endpoint, data) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       if (endpoint.includes('login') || endpoint.includes('signup')) {
+        const userName = data.fullName || data.email?.split('@')[0] || 'User';
         resolve({
           data: {
             token: 'demo-token-' + Date.now(),
             user: {
               id: 'demo-user',
-              fullName: data.fullName || 'Demo User',
+              fullName: userName,
               email: data.email,
-              name: data.fullName || 'Demo User'
+              name: userName
             }
           }
         });
