@@ -4,74 +4,155 @@ import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
 
 const Signup = () => {
-  const [formData, setFormData] = useState({ name: '', email: '', password: '' });
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [error, setError] = useState('');
   const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError('');
+    
+    if (password !== confirmPassword) {
+      setError('Passwords do not match');
+      return;
+    }
+
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     try {
-      const response = await axios.post('http://localhost:5001/api/auth/signup', formData);
-      login(response.data.token, response.data.user);
-      navigate('/dashboard');
+      console.log('Sending signup request:', { fullName: name, email, password: '***' });
+      
+      const response = await axios.post('http://localhost:5001/api/auth/signup', {
+        fullName: name,
+        email,
+        password
+      });
+      
+      console.log('Signup response:', response.data);
+      
+      if (response.data.token && response.data.user) {
+        login(response.data.token, response.data.user);
+        navigate('/dashboard');
+      } else {
+        setError('Signup successful but login failed. Please try logging in.');
+      }
     } catch (error) {
-      setError(error.response?.data?.message || 'Signup failed');
+      console.error('Signup error:', error);
+      setError(error.response?.data?.message || error.message || 'Signup failed');
     }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50">
-      <div className="max-w-md w-full space-y-8">
-        <div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-            Create your NoteSphere account
-          </h2>
+    <div className="min-h-screen bg-surface-light flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full">
+        {/* Header */}
+        <div className="text-center mb-8">
+
+          <h2 className="mt-6 text-3xl font-bold text-text-primary">Create your account</h2>
+          <p className="mt-2 text-text-secondary">Start your productivity journey today</p>
         </div>
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          {error && <div className="text-red-500 text-center">{error}</div>}
-          <div>
-            <input
-              type="text"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              placeholder="Full name"
-              value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
-            />
-          </div>
-          <div>
-            <input
-              type="email"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              placeholder="Email address"
-              value={formData.email}
-              onChange={(e) => setFormData({...formData, email: e.target.value})}
-            />
-          </div>
-          <div>
-            <input
-              type="password"
-              required
-              className="w-full px-3 py-2 border border-gray-300 rounded-md"
-              placeholder="Password"
-              value={formData.password}
-              onChange={(e) => setFormData({...formData, password: e.target.value})}
-            />
-          </div>
-          <button
-            type="submit"
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700"
-          >
-            Sign up
-          </button>
-          <div className="text-center">
-            <Link to="/login" className="text-indigo-600 hover:text-indigo-500">
-              Already have an account? Sign in
-            </Link>
-          </div>
-        </form>
+
+        {/* Signup Card */}
+        <div className="bg-white rounded-2xl shadow-lg border border-border-light p-8">
+          <form onSubmit={handleSubmit} className="space-y-6">
+            {error && (
+              <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg text-sm">
+                {error}
+              </div>
+            )}
+            
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-2">
+                Full Name
+              </label>
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full px-4 py-3 border border-border-light rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent transition-all duration-200"
+                placeholder="Enter your full name"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-2">
+                Email address
+              </label>
+              <input
+                type="email"
+                required
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="w-full px-4 py-3 border border-border-light rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent transition-all duration-200"
+                placeholder="Enter your email"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-2">
+                Password
+              </label>
+              <input
+                type="password"
+                required
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-border-light rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent transition-all duration-200"
+                placeholder="Create a password"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-text-primary mb-2">
+                Confirm Password
+              </label>
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full px-4 py-3 border border-border-light rounded-lg focus:ring-2 focus:ring-primary-blue focus:border-transparent transition-all duration-200"
+                placeholder="Confirm your password"
+              />
+            </div>
+
+            <button
+              type="submit"
+              className="w-full bg-primary-blue text-white py-3 px-4 rounded-lg font-semibold hover:bg-blue-600 transition-all duration-200 shadow-sm hover:shadow-md"
+            >
+              Create Account
+            </button>
+
+            <div className="text-center">
+              <span className="text-text-secondary">Already have an account? </span>
+              <Link to="/login" className="text-primary-blue font-semibold hover:text-blue-600 transition-colors duration-200">
+                Sign in
+              </Link>
+            </div>
+          </form>
+        </div>
+
+        {/* Additional Info */}
+        <div className="mt-8 text-center">
+          <p className="text-sm text-text-secondary">
+            By creating an account, you agree to our{' '}
+            <a href="#" className="text-primary-blue hover:text-blue-600 transition-colors duration-200">
+              Terms of Service
+            </a>{' '}
+            and{' '}
+            <a href="#" className="text-primary-blue hover:text-blue-600 transition-colors duration-200">
+              Privacy Policy
+            </a>
+          </p>
+        </div>
       </div>
     </div>
   );

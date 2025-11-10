@@ -1,102 +1,110 @@
-// backend/routes/auth.js
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
+import authMiddleware from '../middleware/authMiddleware.js';
 
 const router = express.Router();
 
-// small helper to require fields
-const requireFields = (fields, body) => {
-  for (const f of fields) {
-    if (!body[f]) return f;
-  }
-  return null;
-};
-
-// Signup
+// User Signup
 router.post('/signup', async (req, res) => {
   try {
-    console.log('📩 Signup request received:', req.body);
+    console.log('Signup request received:', req.body);
+    
+    const { fullName, email, password } = req.body;
 
-    // basic validation
-    const missing = requireFields(['name', 'email', 'password'], req.body);
-    if (missing) return res.status(400).json({ message: `Missing field: ${missing}` });
+    if (!fullName || !email || !password) {
+      console.log('Missing fields:', { fullName: !!fullName, email: !!email, password: !!password });
+      return res.status(400).json({ message: 'All fields are required' });
+    }
 
-    const { name, email, password } = req.body;
-
-    // check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      return res.status(409).json({ message: 'User already exists' });
+      console.log('User already exists:', email);
+      return res.status(400).json({ message: 'User already exists' });
     }
 
-    // hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
-    // create user
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await User.create({
+      fullName,
+      email,
+      password: hashedPassword
+    });
 
-    // ensure JWT secret exists
-    if (!process.env.JWT_SECRET) {
-      console.error('JWT_SECRET is not defined in environment variables');
-      return res.status(500).json({ message: 'Server configuration error' });
-    }
+    console.log('User created:', user._id);
 
-    // sign token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
-    // respond
+    console.log('Token generated successfully');
+
     res.status(201).json({
+      message: 'User registered successfully',
       token,
-      user: { id: user._id, name: user.name, email: user.email }
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email
+      }
     });
   } catch (error) {
     console.error('Signup error:', error);
-    // return helpful message during development
     res.status(500).json({ message: error.message || 'Server error' });
   }
 });
 
-// Login
+// User Login
 router.post('/login', async (req, res) => {
   try {
-    console.log('🔑 Login request received:', req.body);
-
-    // basic validation
-    const missing = requireFields(['email', 'password'], req.body);
-    if (missing) return res.status(400).json({ message: `Missing field: ${missing}` });
-
     const { email, password } = req.body;
 
-    // find user
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+
     const user = await User.findOne({ email });
     if (!user) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+      return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    // compare password
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(401).json({ message: 'Invalid credentials' });
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
+      return res.status(400).json({ message: 'Invalid email or password' });
     }
 
-    // ensure JWT secret exists
-    if (!process.env.JWT_SECRET) {
-      console.error('JWT_SECRET is not defined in environment variables');
-      return res.status(500).json({ message: 'Server configuration error' });
-    }
-
-    // sign token
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    const token = jwt.sign(
+      { userId: user._id, email: user.email },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
 
     res.json({
       token,
-      user: { id: user._id, name: user.name, email: user.email }
+      user: {
+        id: user._id,
+        fullName: user.fullName,
+        email: user.email
+      }
     });
   } catch (error) {
-    console.error('Login error:', error);
-    res.status(500).json({ message: error.message || 'Server error' });
+    res.status(500).json({ message: 'Server error' });
+  }
+});
+
+// Protected Profile Route
+router.get('/profile', authMiddleware, async (req, res) => {
+  try {
+    const user = await User.findById(req.user.userId).select('-password');
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    res.json(user);
+  } catch (error) {
+    res.status(500).json({ message: 'Server error' });
   }
 });
 
