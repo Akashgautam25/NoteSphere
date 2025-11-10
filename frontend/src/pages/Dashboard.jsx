@@ -83,15 +83,19 @@ const Dashboard = () => {
       const userData = localStorage.getItem(userKey);
       
       if (userData) {
-        const parsed = JSON.parse(userData);
-        setNotes(parsed.notes || []);
-        setCategories(parsed.categories || ['Work', 'Personal', 'Study']);
-        setFavorites(parsed.favorites || []);
-        setArchived(parsed.archived || []);
-        setNotifications(parsed.notifications || [
-          { id: 1, title: 'Welcome to NoteSphere!', message: 'Start creating your first note', read: false, timestamp: new Date().toISOString() }
-        ]);
-        setSettings(parsed.settings || { emailNotifications: false, autoSave: true, theme: 'light' });
+        try {
+          const parsed = JSON.parse(userData);
+          setNotes(parsed.notes || []);
+          setCategories(parsed.categories || ['Work', 'Personal', 'Study']);
+          setFavorites(parsed.favorites || []);
+          setArchived(parsed.archived || []);
+          setNotifications(parsed.notifications || [
+            { id: 1, title: 'Welcome to NoteSphere!', message: 'Start creating your first note', read: false, timestamp: new Date().toISOString() }
+          ]);
+          setSettings(parsed.settings || { emailNotifications: false, autoSave: true, theme: 'light' });
+        } catch (error) {
+          console.error('Error loading user data:', error);
+        }
       } else {
         // New user - create welcome note
         const welcomeNote = {
@@ -118,7 +122,7 @@ const Dashboard = () => {
 
   // Save user data to localStorage whenever it changes
   useEffect(() => {
-    if (user?.email) {
+    if (user?.email && notes.length > 0) {
       const userKey = `notesphere_${user.email}`;
       const userData = {
         notes,
@@ -130,7 +134,11 @@ const Dashboard = () => {
         settings,
         lastUpdated: new Date().toISOString()
       };
-      localStorage.setItem(userKey, JSON.stringify(userData));
+      try {
+        localStorage.setItem(userKey, JSON.stringify(userData));
+      } catch (error) {
+        console.error('Error saving user data:', error);
+      }
     }
   }, [user, notes, categories, tags, favorites, archived, notifications, settings]);
 
@@ -195,7 +203,25 @@ const Dashboard = () => {
       updatedAt: new Date().toISOString(),
       userId: user?.email
     };
-    setNotes([newNote, ...notes]);
+    const updatedNotes = [newNote, ...notes];
+    setNotes(updatedNotes);
+    
+    // Immediately save to localStorage
+    if (user?.email) {
+      const userKey = `notesphere_${user.email}`;
+      const userData = {
+        notes: updatedNotes,
+        categories,
+        tags,
+        favorites,
+        archived,
+        notifications,
+        settings,
+        lastUpdated: new Date().toISOString()
+      };
+      localStorage.setItem(userKey, JSON.stringify(userData));
+    }
+    
     setNoteForm({ title: '', content: '', category: categories[0] || 'Work' });
     setShowNoteModal(false);
     
@@ -788,27 +814,40 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="p-6">
-              {notes.length === 0 ? (
+              {(searchTerm ? filteredNotes : notes).length === 0 ? (
                 <div className="text-center py-12">
                   <div className="text-6xl mb-4">📝</div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">No pages yet</h3>
-                  <p className="text-gray-600 mb-6">Create your first page to get started with organizing your thoughts</p>
-                  <div className="flex justify-center space-x-3">
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {searchTerm ? 'No matching pages found' : 'No pages yet'}
+                  </h3>
+                  <p className="text-gray-600 mb-6">
+                    {searchTerm ? `No pages match "${searchTerm}"` : 'Create your first page to get started with organizing your thoughts'}
+                  </p>
+                  {searchTerm ? (
                     <button 
-                      onClick={openCreateModal}
-                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                      onClick={() => setSearchTerm('')}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                     >
-                      <Plus className="w-4 h-4" />
-                      <span>Create Page</span>
+                      Clear Search
                     </button>
-                    <button 
-                      onClick={() => setActiveTab('templates')}
-                      className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center space-x-2"
-                    >
-                      <BookOpen className="w-4 h-4" />
-                      <span>Browse Templates</span>
-                    </button>
-                  </div>
+                  ) : (
+                    <div className="flex justify-center space-x-3">
+                      <button 
+                        onClick={openCreateModal}
+                        className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 flex items-center space-x-2"
+                      >
+                        <Plus className="w-4 h-4" />
+                        <span>Create Page</span>
+                      </button>
+                      <button 
+                        onClick={() => setActiveTab('templates')}
+                        className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 flex items-center space-x-2"
+                      >
+                        <BookOpen className="w-4 h-4" />
+                        <span>Browse Templates</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="space-y-2">
@@ -1897,7 +1936,12 @@ const Dashboard = () => {
                   type="text"
                   placeholder="Search pages..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(e) => {
+                    setSearchTerm(e.target.value);
+                    if (e.target.value && activeTab !== 'notes') {
+                      setActiveTab('notes');
+                    }
+                  }}
                   className="w-full pl-10 pr-4 py-2 bg-gray-50 border-0 rounded-lg focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all text-sm"
                 />
               </div>
