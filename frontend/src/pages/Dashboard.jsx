@@ -23,7 +23,11 @@ import {
   BarChart3,
   Calendar,
   BookOpen,
-  CheckSquare
+  CheckSquare,
+  Menu,
+  X,
+  User,
+  LogOut
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 
@@ -65,6 +69,7 @@ const Dashboard = () => {
   });
   const [isEditing, setIsEditing] = useState(false);
   const [tempSettings, setTempSettings] = useState(settings);
+  const [showMobileMenu, setShowMobileMenu] = useState(false);
   const [stats, setStats] = useState({
     totalNotes: 0,
     categories: 0,
@@ -555,7 +560,7 @@ const Dashboard = () => {
                 </button>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 lg:gap-4 mb-6">
                 <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border border-blue-200">
                   <div className="flex items-center space-x-3">
                     <div className="text-2xl">📝</div>
@@ -1392,7 +1397,7 @@ const Dashboard = () => {
                 </div>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 xl:grid-cols-2 gap-4 lg:gap-6">
                 <div className="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
                   <div className="flex items-center justify-between mb-6">
                     <h3 className="text-lg font-semibold text-gray-900">Notes Created Over Time</h3>
@@ -1549,7 +1554,7 @@ const Dashboard = () => {
               </div>
             </div>
             <div className="p-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 lg:gap-6">
                 {templates.map((template) => (
                   <div 
                     key={template.id} 
@@ -1776,8 +1781,26 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 flex">
+      {/* Mobile Menu Button */}
+      <button 
+        onClick={() => setShowMobileMenu(!showMobileMenu)}
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-200"
+      >
+        <Menu className="w-5 h-5" />
+      </button>
+      
+      {/* Mobile Overlay */}
+      {showMobileMenu && (
+        <div 
+          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-40"
+          onClick={() => setShowMobileMenu(false)}
+        />
+      )}
+      
       {/* Left Sidebar */}
-      <div className="w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm">
+      <div className={`w-72 bg-white border-r border-gray-200 flex flex-col shadow-sm transition-transform duration-300 ${
+        showMobileMenu ? 'translate-x-0' : '-translate-x-full'
+      } lg:translate-x-0 fixed lg:relative z-40 h-full lg:h-auto`}>
         {/* Logo */}
         <div className="p-4 border-b border-gray-200">
           <div className="flex items-center space-x-3 mb-4">
@@ -1805,7 +1828,10 @@ const Dashboard = () => {
         <nav className="flex-1 p-4 overflow-y-auto">
           <div className="mb-6">
             <button 
-              onClick={openCreateModal}
+              onClick={() => {
+                openCreateModal();
+                setShowMobileMenu(false);
+              }}
               className="w-full flex items-center space-x-3 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-sm hover:shadow-md"
             >
               <Plus className="w-5 h-5" />
@@ -1818,7 +1844,10 @@ const Dashboard = () => {
               return (
                 <li key={item.id}>
                   <button
-                    onClick={() => setActiveTab(item.id)}
+                    onClick={() => {
+                      setActiveTab(item.id);
+                      setShowMobileMenu(false);
+                    }}
                     className={`group w-full flex items-center justify-between px-3 py-3 rounded-xl text-left transition-all duration-200 ${
                       activeTab === item.id
                         ? 'bg-blue-50 text-blue-700 shadow-sm border border-blue-200'
@@ -1856,12 +1885,12 @@ const Dashboard = () => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col lg:ml-0">
         {/* Top Navbar */}
-        <header className="bg-white border-b border-gray-200 px-6 py-3">
+        <header className="bg-white border-b border-gray-200 px-4 lg:px-6 py-3">
           <div className="flex items-center justify-between">
             {/* Search Bar */}
-            <div className="flex-1 max-w-lg">
+            <div className="flex-1 max-w-lg ml-12 lg:ml-0">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <input
@@ -1875,10 +1904,10 @@ const Dashboard = () => {
             </div>
 
             {/* Actions & Profile */}
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-2 lg:space-x-3">
               <button 
                 onClick={openCreateModal}
-                className="flex items-center space-x-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
+                className="flex items-center space-x-2 px-2 lg:px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm"
               >
                 <Plus className="w-4 h-4" />
                 <span className="hidden sm:inline">New</span>
@@ -1886,11 +1915,9 @@ const Dashboard = () => {
               
               <div className="flex items-center space-x-2">
                 <div className="w-7 h-7 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center">
-                  <span className="text-white font-semibold text-xs">
-                    {getUserInitials(user?.fullName || user?.name)}
-                  </span>
+                  <User className="w-4 h-4 text-white" />
                 </div>
-                <div className="hidden sm:block">
+                <div className="hidden md:block">
                   <p className="text-sm font-medium text-gray-900">
                     {(user?.fullName || user?.name || 'Student').split(' ')[0]}
                   </p>
@@ -1900,9 +1927,7 @@ const Dashboard = () => {
                   className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
                   title="Logout"
                 >
-                  <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
+                  <LogOut className="w-4 h-4" />
                 </button>
               </div>
             </div>
@@ -1910,14 +1935,14 @@ const Dashboard = () => {
         </header>
 
         {/* Dashboard Content */}
-        <div className="flex-1 flex">
+        <div className="flex-1 flex flex-col xl:flex-row">
           {/* Main Dashboard */}
-          <main className="flex-1 p-6">
+          <main className="flex-1 p-4 lg:p-6">
             {renderContent()}
           </main>
 
           {/* Right Sidebar - Notion Style */}
-          <aside className="w-72 bg-gray-50 border-l border-gray-200 p-4">
+          <aside className="w-full xl:w-72 bg-gray-50 border-t xl:border-t-0 xl:border-l border-gray-200 p-4">
             <div className="space-y-6">
               {/* Quick Templates */}
               <div>
@@ -1925,7 +1950,7 @@ const Dashboard = () => {
                   <BookOpen className="w-4 h-4 mr-2" />
                   Quick Start
                 </h3>
-                <div className="space-y-2">
+                <div className="grid grid-cols-2 xl:grid-cols-1 gap-2">
                   {templates.slice(0, 4).map((template) => (
                     <button 
                       key={template.id}
@@ -1943,13 +1968,14 @@ const Dashboard = () => {
                           tags: []
                         });
                         setShowNoteModal(true);
+                        setShowMobileMenu(false);
                       }}
                       className="w-full flex items-center space-x-3 px-3 py-2 text-left rounded-lg hover:bg-white hover:shadow-sm transition-all text-sm border border-transparent hover:border-gray-200"
                     >
-                      <div className={`w-8 h-8 bg-gradient-to-br ${template.color} rounded-lg flex items-center justify-center`}>
+                      <div className={`w-8 h-8 bg-gradient-to-br ${template.color} rounded-lg flex items-center justify-center flex-shrink-0`}>
                         <template.icon className="w-4 h-4 text-white" />
                       </div>
-                      <span className="font-medium text-gray-700">{template.name}</span>
+                      <span className="font-medium text-gray-700 truncate">{template.name}</span>
                     </button>
                   ))}
                 </div>
@@ -1965,10 +1991,13 @@ const Dashboard = () => {
                   {notes.slice(0, 5).map((note) => (
                     <button 
                       key={note.id}
-                      onClick={() => openEditModal(note)}
+                      onClick={() => {
+                        openEditModal(note);
+                        setShowMobileMenu(false);
+                      }}
                       className="w-full flex items-center space-x-2 px-3 py-2 text-left rounded-lg hover:bg-white hover:shadow-sm transition-all text-sm border border-transparent hover:border-gray-200"
                     >
-                      <span className="text-sm">📄</span>
+                      <FileText className="w-4 h-4 text-gray-400 flex-shrink-0" />
                       <span className="font-medium text-gray-700 truncate flex-1">{note.title}</span>
                     </button>
                   ))}
@@ -1979,7 +2008,7 @@ const Dashboard = () => {
               </div>
               
               {/* Categories */}
-              <div>
+              <div className="hidden xl:block">
                 <h3 className="text-sm font-semibold text-gray-900 mb-3 flex items-center">
                   <Folder className="w-4 h-4 mr-2" />
                   Categories
